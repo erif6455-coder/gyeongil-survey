@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>경일고등학교 선택과목 수강신청</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      margin: 0;
+      background: #f5f5f5;
+    }
+    
+    .form-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+    
+    .form-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin: 0 0 0.5rem;
+    }
+    
+    .form-subtitle {
+      font-size: 14px;
+      color: #666;
+      margin: 0 0 2rem;
+    }
+    
+    .form-section {
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+    }
+    
+    .form-section.hidden {
+      display: none;
+    }
+    
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin: 0 0 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+    
+    label {
+      display: block;
+      font-size: 15px;
+      font-weight: 500;
+      color: #1a1a1a;
+      margin-bottom: 0.75rem;
+    }
+    
+    .radio-group, .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    
+    .radio-item, .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 15px;
+      color: #333;
+      cursor: pointer;
+    }
+    
+    input[type="radio"],
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      flex-shrink: 0;
+      accent-color: #2563eb;
+    }
+    
+    input[type="text"],
+    textarea {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 15px;
+      border: 1px solid #d0d0d0;
+      border-radius: 6px;
+      font-family: inherit;
+    }
+    
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    
+    input[type="text"]:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      background: white;
+    }
+    
+    .interest-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding: 1rem;
+      background: #f9f9f9;
+      border-radius: 6px;
+      border: 1px solid #e0e0e0;
+    }
+    
+    .interest-item.hidden {
+      display: none;
+    }
+    
+    .interest-item textarea {
+      margin-top: 0.5rem;
+    }
+    
+    .submit-btn {
+      width: 100%;
+      padding: 0.875rem;
+      font-size: 15px;
+      font-weight: 600;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 2rem;
+      transition: all 0.2s;
+    }
+    
+    .submit-btn:hover {
+      background: #1d4ed8;
+    }
+    
+    .submit-btn:active {
+      transform: scale(0.98);
+    }
+    
+    .submit-btn:disabled {
+      background: #cbd5e1;
+      cursor: not-allowed;
+    }
+    
+    .success-message {
+      display: none;
+      padding: 1rem;
+      background: #d1fae5;
+      color: #065f46;
+      border-radius: 6px;
+      text-align: center;
+      margin-top: 1rem;
+      border: 1px solid #6ee7b7;
+    }
+    
+    .error-message {
+      display: none;
+      padding: 1rem;
+      background: #fee2e2;
+      color: #991b1b;
+      border-radius: 6px;
+      text-align: center;
+      margin-top: 1rem;
+      border: 1px solid #fca5a5;
+    }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 1rem;
+    }
+    
+    .step-indicator {
+      font-size: 12px;
+      color: #2563eb;
+      font-weight: 600;
+      background: #dbeafe;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+    }
+    
+    .loading {
+      display: none;
+      text-align: center;
+      color: #2563eb;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="form-container">
+  <h1 class="form-title">경일고등학교 선택과목 수강신청</h1>
+  <p class="form-subtitle">2026학년도 선택과목 사전 수요조사</p>
+  
+  <!-- 섹션 1: 기본정보 -->
+  <div class="form-section" id="section-basic">
+    <div class="section-header">
+      <span class="step-indicator">필수 정보</span>
+    </div>
+    <h2 class="section-title">기본 정보</h2>
+    
+    <div class="form-group">
+      <label>현재 학년은?</label>
+      <div class="radio-group">
+        <label class="radio-item">
+          <input type="radio" name="grade" value="1" onchange="updateSections()">
+          현재 1학년 (2학년 때 수강과목 선택)
+        </label>
+        <label class="radio-item">
+          <input type="radio" name="grade" value="2" onchange="updateSections()">
+          현재 2학년 (3학년 때 수강과목 선택)
+        </label>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label>반</label>
+      <div class="radio-group">
+        <label class="radio-item">
+          <input type="radio" name="class" value="1">
+          1반
+        </label>
+        <label class="radio-item">
+          <input type="radio" name="class" value="2">
+          2반
+        </label>
+        <label class="radio-item">
+          <input type="radio" name="class" value="3">
+          3반
+        </label>
+        <label class="radio-item">
+          <input type="radio" name="class" value="4">
+          4반
+        </label>
+        <label class="radio-item">
+          <input type="radio" name="class" value="5">
+          5반
+        </label>
+        <label class="radio-item">
+          <input type="radio" name="class" value="6">
+          6반
+        </label>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label for="studentNum">번호 <span style="color: #666;">(예: 15)</span></label>
+      <input type="text" id="studentNum" name="studentNum" placeholder="번호를 입력하세요" required>
+    </div>
+  </div>
+  
+  <!-- 섹션 2: 2학년 1학기 -->
+  <div class="form-section hidden" id="section-2-1">
+    <div class="section-header">
+      <span class="step-indicator">1/2</span>
+    </div>
+    <h2 class="section-title">2학년 1학기 선택과목</h2>
+    
+    <div class="form-group">
+      <label>제2외국어 (택1)</label>
+      <div class="radio-group">
+        <label class="radio-item">
+          <input type="radio" name="grade2-1-lang" value="일본어">
+          일본어
+        </label>
+        <label class="radio-item">
+          <input type="radio" name="grade2-1-lang" value="중국어">
+          중국어
+        </label>
+        <label class="radio-item">
+          <input type="radio" name="grade2-1-lang" value="한문">
+          한문
+        </label>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label>사회/과학 (택2 - 2개 선택)</label>
+      <div class="checkbox-group">
+        <label class="checkbox-item">
+          <input type="checkbox" name="grade2-1-social" value="세계사">
+          세계사
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" name="grade2-1-social" value="현대 사회와 윤리">
+          현대 사회와 윤리
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" name="grade2-1-social" value="지구과학">
+          지구과학
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" name="grade2-1-social" value="생명과학">
+          생명과학
+        </label>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label>교양정보 (택1)</label>
+      <div class="radio-group">
+        <label class="radio-item">
+          <input type="radio" name="grade2-1-info" value="교육의 이해">
+          교육의 이해
+        </label>
+        <label class="radio-item">
+          <input type="radio" name="grade2-1-info" value="인공지능 기초">
+          인공지능 기초
+        </label>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 섹션 3: 2학년 2학기 -->
+  <div class="form-section hidden" id="section-2-2">
+    <div class="section-header">
+      <span class="step-indicator">2/2</span>
+    </div>
+    <h2 class="section-title">2학년 2학기 선택과목</h2>
+    
+    <div class="form-group">
+      <label>제2외국어 회화 (택1)</label>
+      <div class="radio-group">
+        <label class="radio-item">
+          <input type="radio" name="grade2-2-lang" value="일본어 회화">
+          일본어 회화
+        </label>
+        <label class="radio-item">
+          <input type="radio" name="grade2-2-lang" value="중국어 회화">
+          중국어 회화
+        </label>
+        <label class="radio-item">
+          <input type="radio" name="grade2-2-lang" value="언어생활과 한자">
+          언어생활과 한자
+        </label>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label>사회/과학 (택2 - 2개 선택)</label>
+      <div class="checkbox-group">
+        <label class="checkbox-item">
+          <input type="checkbox" name="grade2-2-social" value="한국지리탐구">
+          한국지리탐구
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" name="grade2-2-social" value="경제">
+          경제
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" name="grade2-2-social" value="화학">
+          화학
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" name="grade2-2-social" value="물리학">
+          물리학
+        </label>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label>교양 (택1)</label>
+      <div class="radio-group">
+        <label class="radio-item">
+          <input type="radio" name="grade2-2-culture" value="인간과 심리">
+          인간과 심리
+        </label>
+        <label class="radio-item">
+          <input type="radio" name="grade2-2-culture" value="인간과 철학">
+          인간과 철학
+        </label>
+        <label class="radio-item">
+          <input type="radio" name="grade2-2-culture" value="논술">
+          논술
+        </label>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 섹션 4: 3학년 1학기 -->
+  <div class="form-section hidden" id="section-3-1">
+    <div class="section-header">
+      <span class="step-indicator">1/2</span>
+    </div>
+    <h2 class="section-title">3학년 1학기 선택과목</h2>
+    
+    <div class="form-group">
+      <label>수학 (택1)</label>
+      <div class="radio-group">
+        <label class="radio-item">
+          <input type="radio" name="grade3-1-math" value="경제 수학">
+          경제 수학
+        </label>
+        <label class="radio-item">
+          <input type="radio" name="grade3-1-math" value="미적분 Ⅱ">
+          미적분 Ⅱ
+        </label>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label>사회/과학 (택2 - 2개 선택)</label>
+      <div class="checkbox-group">
+        <label class="checkbox-item">
+          <input type="checkbox" name="grade3-1-social" value="세계시민과 지리">
+          세계시민과 지리
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" name="grade3-1-social" value="사회와 문화">
+          사회와 문화
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" name="grade3-1-social" value="화학 반응의 세계">
+          화학 반응의 세계
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" name="grade3-1-social" value="전자기와 양자">
+          전자기와 양자
+        </label>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label>심화 탐구 (택2 - 2개 선택)</label>
+      <div class="checkbox-group">
+        <label class="checkbox-item">
+          <input type="checkbox" name="grade3-1-inquiry" value="수학과제 탐구">
+          수학과제 탐구
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" name="grade3-1-inquiry" value="매체 의사 소통">
+          매체 의사 소통
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" name="grade3-1-inquiry" value="사회 문제 탐구">
+          사회 문제 탐구
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" name="grade3-1-inquiry" value="융합 과학 탐구">
+          융합 과학 탐구
+        </label>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 섹션 5: 3학년 2학기 -->
+  <div class="form-section hidden" id="section-3-2">
+    <div class="section-header">
+      <span class="step-indicator">2/2</span>
+    </div>
+    <h2 class="section-title">3학년 2학기 선택과목</h2>
+    
+    <div class="form-group">
+      <label>수학 (택1)</label>
+      <div class="radio-group">
+        <label class="radio-item">
+          <input type="radio" name="grade3-2-math" value="수학과 문화">
+          수학과 문화
+        </label>
+        <label class="radio-item">
+          <input type="radio" name="grade3-2-math" value="고급 대수">
+          고급 대수
+        </label>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label>국어/영어 (택1)</label>
+      <div class="radio-group">
+        <label class="radio-item">
+          <input type="radio" name="grade3-2-lang" value="주제 탐구와 독서">
+          주제 탐구와 독서
+        </label>
+        <label class="radio-item">
+          <input type="radio" name="grade3-2-lang" value="심화 영어 독해와 작문">
+          심화 영어 독해와 작문
+        </label>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label>사회/과학 (택2 - 2개 선택)</label>
+      <div class="checkbox-group">
+        <label class="checkbox-item">
+          <input type="checkbox" name="grade3-2-social" value="여행지리">
+          여행지리
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" name="grade3-2-social" value="금융과 경제생활">
+          금융과 경제생활
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" name="grade3-2-social" value="세포와 물질대사">
+          세포와 물질대사
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" name="grade3-2-social" value="역학과 에너지">
+          역학과 에너지
+        </label>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label>심화 탐구 (택2 - 2개 선택)</label>
+      <div class="checkbox-group">
+        <label class="checkbox-item">
+          <input type="checkbox" name="grade3-2-inquiry" value="문학과 영상">
+          문학과 영상
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" name="grade3-2-inquiry" value="영미문학읽기">
+          영미문학읽기
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" name="grade3-2-inquiry" value="역사로 탐구하는 현대세계">
+          역사로 탐구하는 현대세계
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" name="grade3-2-inquiry" value="물질과 에너지">
+          물질과 에너지
+        </label>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 섹션 6: 추가학습의향 -->
+  <div class="form-section" id="section-interest">
+    <h2 class="section-title">추가 학습 의향</h2>
+    
+    <label style="margin-bottom: 1rem;">추가로 배우고 싶은 계열이 있나요? (선택사항)</label>
+    
+    <div class="interest-item hidden" id="interest-humanities">
+      <label class="checkbox-item" style="margin: 0;">
+        <input type="checkbox" name="interest" value="인문 계열" onchange="updateInterestFields()">
+        <span style="font-weight: 500;">인문 계열</span>
+      </label>
+      <textarea name="interest-humanities-reason" placeholder="인문 계열을 선택한 이유를 작성해주세요 (철학, 문학, 역사 심화, 한문학 등)"></textarea>
+    </div>
+    
+    <div class="interest-item hidden" id="interest-social">
+      <label class="checkbox-item" style="margin: 0;">
+        <input type="checkbox" name="interest" value="사회 계열" onchange="updateInterestFields()">
+        <span style="font-weight: 500;">사회 계열</span>
+      </label>
+      <textarea name="interest-social-reason" placeholder="사회 계열을 선택한 이유를 작성해주세요 (경제, 사회문제, 지리 심화, 시민의식 등)"></textarea>
+    </div>
+    
+    <div class="interest-item hidden" id="interest-medical">
+      <label class="checkbox-item" style="margin: 0;">
+        <input type="checkbox" name="interest" value="의약 계열" onchange="updateInterestFields()">
+        <span style="font-weight: 500;">의약 계열</span>
+      </label>
+      <textarea name="interest-medical-reason" placeholder="의약 계열을 선택한 이유를 작성해주세요 (의학 입문, 보건, 의료공학, 생명과학 심화 등)"></textarea>
+    </div>
+    
+    <div class="interest-item hidden" id="interest-engineering">
+      <label class="checkbox-item" style="margin: 0;">
+        <input type="checkbox" name="interest" value="공학 계열" onchange="updateInterestFields()">
+        <span style="font-weight: 500;">공학 계열</span>
+      </label>
+      <textarea name="interest-engineering-reason" placeholder="공학 계열을 선택한 이유를 작성해주세요 (프로그래밍, 공학 기초, AI 심화 등)"></textarea>
+    </div>
+  </div>
+  
+  <div class="loading" id="loading">제출 중입니다...</div>
+  <button class="submit-btn" id="submitBtn" onclick="submitForm()">제출하기</button>
+  <div class="success-message" id="successMsg">✓ 제출되었습니다. 감사합니다!</div>
+  <div class="error-message" id="errorMsg">오류가 발생했습니다. 다시 시도해주세요.</div>
+</div>
+
+<script>
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwj22ilFtbP3RugmmizQM9VNIeHAh_SExKRVlgY8hDRJFEEFaO5gD5aih8uS9DdORU/exec";
+
+function updateSections() {
+  const grade = document.querySelector('input[name="grade"]:checked')?.value;
+  
+  document.getElementById('section-2-1').classList.toggle('hidden', grade !== '1');
+  document.getElementById('section-2-2').classList.toggle('hidden', grade !== '1');
+  document.getElementById('section-3-1').classList.toggle('hidden', grade !== '2');
+  document.getElementById('section-3-2').classList.toggle('hidden', grade !== '2');
+}
+
+function updateInterestFields() {
+  const humanities = document.querySelector('input[name="interest"][value="인문 계열"]')?.checked;
+  const social = document.querySelector('input[name="interest"][value="사회 계열"]')?.checked;
+  const medical = document.querySelector('input[name="interest"][value="의약 계열"]')?.checked;
+  const engineering = document.querySelector('input[name="interest"][value="공학 계열"]')?.checked;
+  
+  document.getElementById('interest-humanities').classList.toggle('hidden', !humanities);
+  document.getElementById('interest-social').classList.toggle('hidden', !social);
+  document.getElementById('interest-medical').classList.toggle('hidden', !medical);
+  document.getElementById('interest-engineering').classList.toggle('hidden', !engineering);
+}
+
+function getFormData() {
+  const data = {};
+  const formElements = document.querySelectorAll('input[type="radio"]:checked, input[type="checkbox"]:checked, input[type="text"], textarea');
+  
+  formElements.forEach(el => {
+    if (el.name) {
+      if (el.type === 'checkbox' && !el.checked) return;
+      
+      if (el.type === 'checkbox') {
+        if (!data[el.name]) data[el.name] = [];
+        data[el.name].push(el.value);
+      } else if (el.type === 'radio' || el.type === 'text') {
+        if (el.value) data[el.name] = el.value;
+      } else if (el.tagName === 'TEXTAREA') {
+        if (el.value) data[el.name] = el.value;
+      }
+    }
+  });
+  
+  return data;
+}
+
+function submitForm() {
+  const grade = document.querySelector('input[name="grade"]:checked')?.value;
+  const classNum = document.querySelector('input[name="class"]:checked')?.value;
+  const studentNum = document.getElementById('studentNum').value;
+  
+  if (!grade || !classNum || !studentNum) {
+    alert('기본 정보를 모두 입력해주세요.');
+    return;
+  }
+  
+  const data = getFormData();
+  
+  // 제출 버튼 비활성화
+  const btn = document.getElementById('submitBtn');
+  const loading = document.getElementById('loading');
+  btn.disabled = true;
+  loading.style.display = 'block';
+  
+  // Apps Script로 데이터 전송
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify(data)
+  })
+  .then(response => {
+    loading.style.display = 'none';
+    document.getElementById('successMsg').style.display = 'block';
+    
+    // 3초 후 폼 초기화
+    setTimeout(() => {
+      document.getElementById('successMsg').style.display = 'none';
+      document.querySelector('form')?.reset?.() || location.reload();
+    }, 3000);
+  })
+  .catch(error => {
+    loading.style.display = 'none';
+    btn.disabled = false;
+    document.getElementById('errorMsg').style.display = 'block';
+    console.error('Error:', error);
+    
+    setTimeout(() => {
+      document.getElementById('errorMsg').style.display = 'none';
+    }, 3000);
+  });
+}
+</script>
+
+</body>
+</html>
